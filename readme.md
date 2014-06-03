@@ -9,7 +9,6 @@
     * ~~BONUS: Use Foursquare [Venues API](https://developer.foursquare.com/docs/venues/search) to be more intelligent about location changes~~ _Venues API doesn't include venue perimeter making this more difficult than time allows_
     * BONUS: If arrival/departure of venue detected post local notification
   * Set update interval on CL to conserve battery power
-  * Write comprehensive README.md file with OmniGraffle Pro generated class diagram
   * Use ~~SBJSON framework for JSON Parsing~~
     * **UPDATE:** [Apple `NSJSONSerialization` is faster](http://stackoverflow.com/questions/16218583/jsonkit-benchmarks)
 
