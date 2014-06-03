@@ -10,85 +10,52 @@
 
 #import "DetailCell.h"
 
-#import "Group.h"
-#import "MeetupManager.h"
-#import "MeetupCommunicator.h"
+#import "OQLocation.h"
+#import "OQLocationManager.h"
 
-@interface MasterViewController () <MeetupManagerDelegate> {
-    NSArray *_groups;
-    MeetupManager *_manager;
+@implementation MasterViewController {
+    OQLocationManager* locationManager;
+
 }
-@property (weak, nonatomic) CLLocationManager *locationManager;
-@end
 
-@implementation MasterViewController
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
 
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-    
-    _manager = [[MeetupManager alloc] init];
-    _manager.communicator = [[MeetupCommunicator alloc] init];
-    _manager.communicator.delegate = _manager;
-    _manager.delegate = self;
-    
+    locationManager = [OQLocationManager sharedOQLocationManager];
+
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(startFetchingGroups:)
-                                                 name:@"kCLAuthorizationStatusAuthorized"
+                                             selector:@selector(reloadData:)
+                                                 name:@"OQLocationManagerAddedLocations"
+                                               object:nil];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(reloadData:)
+                                                 name:@"OQLocationManagerCompletedLocationResearch"
                                                object:nil];
 }
 
-#pragma mark - Accessors
+- (void)viewWillDisappear:(BOOL)animated {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 
-- (CLLocationManager *)locationManager
-{
-    if (_locationManager) {
-        return _locationManager;
-    }
-    
-    id appDelegate = [[UIApplication sharedApplication] delegate];
-    if ([appDelegate respondsToSelector:@selector(locationManager)]) {
-        _locationManager = [appDelegate performSelector:@selector(locationManager)];
-    }
-    return _locationManager;
+    [super viewWillDisappear:animated];
 }
 
-#pragma mark - Notification Observer
-- (void)startFetchingGroups:(NSNotification *)notification
-{
-    [_manager fetchGroupsAtCoordinate:self.locationManager.location.coordinate];
-}
-
-#pragma mark - MeetupManagerDelegate
-- (void)didReceiveGroups:(NSArray *)groups
-{
-    _groups = groups;
+- (void)reloadData:(NSNotification*)notification {
+    NSLog(@"Notification received: %@", notification);
     [self.tableView reloadData];
 }
 
-- (void)fetchingGroupsFailedWithError:(NSError *)error
-{
-    NSLog(@"Error %@; %@", error, [error localizedDescription]);
-}
-
-
 #pragma mark - Table View
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
-    return _groups.count;
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return locationManager.locationHistory.count;
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    DetailCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    DetailCell* cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
     
-    Group *group = _groups[indexPath.row];
-    [cell.nameLabel setText:group.name];
-    [cell.whoLabel setText:group.who];
-    [cell.locationLabel setText:[NSString stringWithFormat:@"%@, %@", group.city, group.country]];
-    [cell.descriptionLabel setText:group.description];
-    
+    OQLocation* location = [locationManager.locationHistory objectAtIndex:indexPath.row];
+    [cell configureWithLocation:location];
+
     return cell;
 }
 

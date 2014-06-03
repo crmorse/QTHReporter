@@ -8,9 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
+@class OQLocation;
+
 @interface DetailCell : UITableViewCell
-@property (weak, nonatomic) IBOutlet UILabel *nameLabel;
-@property (weak, nonatomic) IBOutlet UILabel *whoLabel;
-@property (weak, nonatomic) IBOutlet UILabel *descriptionLabel;
 @property (weak, nonatomic) IBOutlet UILabel *locationLabel;
+@property (weak, nonatomic) IBOutlet UILabel *venueLabel;
+@property (weak, nonatomic) IBOutlet UILabel *geocodeLabel;
+@property (weak, nonatomic) IBOutlet UILabel *descriptionLabel;
+
+- (void)configureWithLocation:(OQLocation*)location;
+
 @end
